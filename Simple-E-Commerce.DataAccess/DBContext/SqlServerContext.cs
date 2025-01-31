@@ -22,7 +22,6 @@ namespace Simple_E_Commerce.DataAccess.DBContext
             DataTable Result = new DataTable();
             using (SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))
             {
-
                 using (SqlCommand Command = new SqlCommand(Query, Connection))
                 {
                     Command.CommandType = CommandType.Text;
@@ -150,6 +149,7 @@ namespace Simple_E_Commerce.DataAccess.DBContext
             {
                 int r = _DisconnectedDataAdapter.Update(DataContainer);
                 if (r == 0) throw new Exception("No rows were updated!");
+
             }
             catch (Exception ex)
             {
