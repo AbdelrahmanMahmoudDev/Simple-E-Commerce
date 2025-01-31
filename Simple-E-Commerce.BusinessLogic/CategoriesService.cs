@@ -42,7 +42,14 @@ namespace Simple_E_Commerce.BusinessLogic
                 INSERT INTO Categories (CategoryId, CategoryName)
                 VALUES (@CategoryId, @CategoryName);
                 """;
-            _DBContext.ExecuteNonSelect(DMLType.Insert, InsertQuery.Trim(), UpdateParams);
+
+            List<SqlParameter> InsertParams = new List<SqlParameter>()
+            {
+                new SqlParameter("CategoryName", SqlDbType.VarChar, 255, "CategoryName"),
+                new SqlParameter("CategoryId", SqlDbType.Int, 4, "CategoryId"),
+            };
+
+            _DBContext.ExecuteNonSelect(DMLType.Insert, InsertQuery.Trim(), InsertParams);
 
             const string DeleteQuery = """
                 DELETE FROM Categories

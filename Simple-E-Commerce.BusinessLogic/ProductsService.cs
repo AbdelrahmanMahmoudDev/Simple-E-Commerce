@@ -48,7 +48,16 @@ namespace Simple_E_Commerce.BusinessLogic
                 INSERT INTO Products (ProductId, ProductName, Price, CategoryId)
                 VALUES (@ProductId, @ProductName, @Price, CategoryId);
                 """;
-            _DBContext.ExecuteNonSelect(DMLType.Insert, InsertQuery.Trim(), UpdateParams);
+
+            List<SqlParameter> InsertParams = new List<SqlParameter>()
+            {
+                new SqlParameter("ProductId", SqlDbType.Int, sizeof(int), "ProductId"),
+                new SqlParameter("ProductName", SqlDbType.VarChar, 255 * sizeof(char), "ProductName"),
+                new SqlParameter("Price", SqlDbType.Decimal, sizeof(decimal), "Price"),
+                new SqlParameter("CategoryId", SqlDbType.Decimal, sizeof(int), "CategoryId"),
+            };
+
+            _DBContext.ExecuteNonSelect(DMLType.Insert, InsertQuery.Trim(), InsertParams);
 
             const string DeleteQuery = """
                 DELETE FROM Products

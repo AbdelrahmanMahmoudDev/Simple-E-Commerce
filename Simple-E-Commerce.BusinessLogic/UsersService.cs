@@ -60,7 +60,20 @@ namespace Simple_E_Commerce.BusinessLogic
                 INSERT INTO USERS (UserId, Username, PasswordHash, Salt, Email, Age, Address, IsAdmin)
                 VALUES (@UserId, @Username, @PasswordHash, @Salt, @Email, @Age, @Address, @IsAdmin);
                 """;
-            _DBContext.ExecuteNonSelect(DMLType.Insert, InsertQuery.Trim(), UpdateParams);
+
+            List<SqlParameter> InsertParams = new List<SqlParameter>()
+            {
+                new SqlParameter("UserId", SqlDbType.Int, 4, "UserId"),
+                new SqlParameter("Username", SqlDbType.NVarChar, 50, "Username"),
+                new SqlParameter("PasswordHash", SqlDbType.VarChar, 255, "PasswordHash"),
+                new SqlParameter("Salt", SqlDbType.VarChar, 255, "Salt"),
+                new SqlParameter("Email", SqlDbType.NVarChar, 100, "Email"),
+                new SqlParameter("Age", SqlDbType.Int, 4, "Age"),
+                new SqlParameter("Address", SqlDbType.NVarChar, 255, "Address"),
+                new SqlParameter("IsAdmin", SqlDbType.Bit, 1, "IsAdmin"),
+            };
+
+            _DBContext.ExecuteNonSelect(DMLType.Insert, InsertQuery.Trim(), InsertParams);
 
             const string DeleteQuery = """
                 DELETE FROM USERS
