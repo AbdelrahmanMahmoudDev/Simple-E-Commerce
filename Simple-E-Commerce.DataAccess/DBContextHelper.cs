@@ -13,8 +13,8 @@ namespace Simple_E_Commerce.DataAccess
         static public string ConnectionString;
         static public void Init()
         {
-            string SolutionDirectory = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName,"appsettings.json");
-
+            string SolutionDirectory = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "appsettings.json");
+            
             _Configuration = new ConfigurationBuilder()
             .AddJsonFile(SolutionDirectory)
             .Build();
