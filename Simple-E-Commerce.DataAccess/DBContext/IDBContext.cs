@@ -10,15 +10,13 @@ namespace Simple_E_Commerce.DataAccess.DBContext
     {
         Insert, Update, Delete
     }
-    internal interface IDBContext<T, K>
+    public interface IDBContext
     {
         // Selects Execute in Connected Mode
-        public T ExecuteSelect(string Query);
-        public T ExecuteSelect<U>(string Query, params List<U> ParamList);
-
+        public DataTable ExecuteSelect(string Query);
+        public DataTable ExecuteSelect(string Query, params List<SqlParameter> ParamList);
         // DML Queries execute in Disconnected Mode
-        public void ExecuteNonSelect(DMLType Type, string Query);
-        public void ExecuteNonSelect<U>(DMLType Type, string Query, params List<U> ParamList);
-        public void UploadToServer(T DataContainer);
+        public void ExecuteNonSelect(DMLType Type, string Query, params List<SqlParameter> ParamList);
+        public void UploadToServer(DataTable DataContainer);
     }
 }

@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <RootNamespace>Simple_E_Commerce.Presentation</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Simple-E-Commerce.BusinessLogic\Simple-E-Commerce.BusinessLogic.csproj" />
+    <ProjectReference Include="..\Simple-E-Commerce.DataAccess\Simple-E-Commerce.DataAccess.csproj" />
+  </ItemGroup>
+
+</Project>

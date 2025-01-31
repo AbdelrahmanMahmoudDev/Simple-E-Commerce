@@ -9,12 +9,11 @@ using Microsoft.Data.SqlClient;
 
 namespace Simple_E_Commerce.DataAccess.DBContext
 {
-    public class SqlServerContext : IDBContext<DataTable, int>
+    public class SqlServerContext : IDBContext
     {
         private SqlDataAdapter _DisconnectedDataAdapter;
         public SqlServerContext()
         {
-            DBContextHelper.Init();
             _DisconnectedDataAdapter = new SqlDataAdapter();
         }
         public DataTable ExecuteSelect(string Query)
@@ -48,7 +47,7 @@ namespace Simple_E_Commerce.DataAccess.DBContext
             }
             return Result;
         }
-        public DataTable ExecuteSelect<SqlParameter>(string Query, params List<SqlParameter> ParamList)
+        public DataTable ExecuteSelect(string Query, params List<SqlParameter> ParamList)
         {
             DataTable Result = new DataTable();
             using (SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))
@@ -83,35 +82,7 @@ namespace Simple_E_Commerce.DataAccess.DBContext
             }
             return Result;
         }
-        public void ExecuteNonSelect(DMLType Type, string Query)
-        {
-            using (SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))
-            {
-                using (SqlCommand Command = new SqlCommand(Query, Connection))
-                {
-                    Command.CommandType = CommandType.Text;
-                    switch (Type)
-                    {
-                        case DMLType.Insert:
-                            {
-                                _DisconnectedDataAdapter.InsertCommand = Command;
-                            }
-                            break;
-                        case DMLType.Update:
-                            {
-                                _DisconnectedDataAdapter.UpdateCommand = Command;
-                            }
-                            break;
-                        case DMLType.Delete:
-                            {
-                                _DisconnectedDataAdapter.DeleteCommand = Command;
-                            }
-                            break;
-                    }
-                }
-            }
-        }
-        public void ExecuteNonSelect<SqlParameter>(DMLType Type, string Query, params List<SqlParameter> ParamList)
+        public void ExecuteNonSelect(DMLType Type, string Query, params List<SqlParameter> ParamList)
         {
             using (SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))
             {
@@ -122,6 +93,7 @@ namespace Simple_E_Commerce.DataAccess.DBContext
                     {
                         Command.Parameters.Add(Param);
                     }
+                    _DisconnectedDataAdapter = new SqlDataAdapter(Command);
                     switch (Type)
                     {
                         case DMLType.Insert:
@@ -145,16 +117,23 @@ namespace Simple_E_Commerce.DataAccess.DBContext
         }
         public void UploadToServer(DataTable DataContainer)
         {
-            try
+            using(SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))
             {
-                int r = _DisconnectedDataAdapter.Update(DataContainer);
-                if (r == 0) throw new Exception("No rows were updated!");
-
-            }
-            catch (Exception ex)
-            {
-                // TODO: Logger
-                Debug.WriteLine(ex);
+                try
+                {
+                    Connection.Open();
+                    int r = _DisconnectedDataAdapter.Update(DataContainer);
+                    if (r == 0) throw new Exception("No rows were updated!");
+                }
+                catch (Exception ex)
+                {
+                    // TODO: Logger
+                    Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    Connection.Close();
+                }
             }
         }
     }

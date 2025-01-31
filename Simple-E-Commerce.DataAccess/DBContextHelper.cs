@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Simple_E_Commerce.DataAccess.DBContext;
 
 namespace Simple_E_Commerce.DataAccess
 {
-    internal static class DBContextHelper
+    public static class DBContextHelper
     {
         static private IConfigurationRoot _Configuration;
         static public string ConnectionString;
-        static public void Init()
+        static public IDBContext Init()
         {
             string SolutionDirectory = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "appsettings.json");
             
@@ -20,6 +21,13 @@ namespace Simple_E_Commerce.DataAccess
             .Build();
 
             ConnectionString = _Configuration.GetSection("constr").Value;
+
+            if (string.IsNullOrEmpty(ConnectionString))
+            {
+                throw new InvalidOperationException("Connection string is not set in appsettings.json.");
+            }
+
+            return new SqlServerContext();
         }
     }
 }
