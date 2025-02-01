@@ -1,4 +1,6 @@
 ﻿using System.Data;
+using System.Diagnostics;
+using System.Formats.Tar;
 using Microsoft.Data.SqlClient;
 using Simple_E_Commerce.DataAccess.DBContext;
 
@@ -17,6 +19,7 @@ namespace Simple_E_Commerce.BusinessLogic
     {
         #region Private_Properties
         private static DataTable _AllUsersTable;
+        public static DataTable AllUsersTable { get => _AllUsersTable; }
         private IDBContext _DBContext;
         // All primary keys are identity, so this should work for what it is
         #endregion
@@ -76,7 +79,7 @@ namespace Simple_E_Commerce.BusinessLogic
                 DELETE FROM USERS
                 WHERE UserId = @UserId;
                 """;
-            _DBContext.ExecuteNonSelect(DMLType.Delete, InsertQuery.Trim(), new List<SqlParameter>() { new SqlParameter("UserId", SqlDbType.Int, 4, "UserId") });
+            _DBContext.ExecuteNonSelect(DMLType.Delete, DeleteQuery.Trim(), new List<SqlParameter>() { new SqlParameter("UserId", SqlDbType.Int, 4, "UserId") });
 
             _AllUsersTable = GetAllUsers();
             _AllUsersTable.Columns["UserId"].AutoIncrement = true;
@@ -90,15 +93,25 @@ namespace Simple_E_Commerce.BusinessLogic
             return Result;
         }
 
-        public DataTable GetUserBasedOnName(string InputUsername)
+        public DataTable GetUserBasedOnName(string InputUsername, out string ErrorMessage)
         {
+            DataTable Result = null;
+            ErrorMessage = "";
             const string Query = """
                 SELECT * FROM USERS
                 WHERE Username = @Username;
                 """;
-            DataTable Result = _DBContext.ExecuteSelect(Query,
+
+            try
+            {
+                Result = _DBContext.ExecuteSelect(Query,
                 new SqlParameter("Username", InputUsername));
 
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error: {ex.Message}";
+            }
             return Result;
         }
 
@@ -118,14 +131,19 @@ namespace Simple_E_Commerce.BusinessLogic
             return false;
         }
 
-        public string VerifyUser(string InputUsername, string InputPassword)
+        public bool VerifyUser(string InputUsername, string InputPassword, out string ErrorResult)
         {
-            string ErrorResult = string.Empty;
+            ErrorResult = string.Empty;
             if (!SearchUsernames(InputUsername, out string Result))
             {
                 ErrorResult = Result;
             }
-            DataTable TargetUser = GetUserBasedOnName(InputUsername);
+            DataTable TargetUser = GetUserBasedOnName(InputUsername, out string ErrorMessage);
+            if (TargetUser.Rows.Count < 1)
+            {
+                ErrorResult = "User doesn't exist in database!";
+                return false;
+            }
             DataRow Row = TargetUser.Rows[0];
             string StoredHash = Row["PasswordHash"].ToString();
             string StoredSalt = Row["Salt"].ToString();
@@ -135,12 +153,13 @@ namespace Simple_E_Commerce.BusinessLogic
                 ErrorResult = "The username or password you've entered is incorrect!";
             }
 
-            return ErrorResult;
+            return true;
         }
 
         public bool IsUserAdmin(string InputUsername)
         {
-            DataTable TargetUser = GetUserBasedOnName(InputUsername);
+            DataTable TargetUser = GetUserBasedOnName(InputUsername, out string ErrorMessage);
+            Debug.Assert(TargetUser != null, "The InputUsername passed here shouldn't be invalid!");
             DataRow Row = TargetUser.Rows[0];
             return (bool)Row["IsAdmin"];
         }
