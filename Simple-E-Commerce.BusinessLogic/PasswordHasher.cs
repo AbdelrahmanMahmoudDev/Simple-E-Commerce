@@ -42,20 +42,20 @@ namespace Simple_E_Commerce.BusinessLogic
         {
             // Decode the stored hash and salt from Base64 to byte arrays
             byte[] StoredHashBytes = Convert.FromBase64String(StoredHash);
-            byte[] SaltBytes = Convert.FromBase64String(StoredSalt);
+            byte[] StoredSaltBytes = Convert.FromBase64String(StoredSalt);
 
             // Convert the input password to a byte array
             byte[] InputPasswordBytes = Encoding.UTF8.GetBytes(InputPassword);
 
             // Combine the input password and salt
-            byte[] SaltedPassword = new byte[InputPasswordBytes.Length + SaltBytes.Length];
+            byte[] SaltedPassword = new byte[InputPasswordBytes.Length + StoredSaltBytes.Length];
             Array.Copy(InputPasswordBytes, 0, SaltedPassword, 0, InputPasswordBytes.Length);
-            Array.Copy(SaltBytes, 0, SaltedPassword, InputPasswordBytes.Length, SaltBytes.Length);
+            Array.Copy(StoredSaltBytes, 0, SaltedPassword, InputPasswordBytes.Length, StoredSaltBytes.Length);
 
             // Initialize HMAC with the stored salt as the key
             using (HMACSHA256 hmac = new HMACSHA256())
             {
-                hmac.Key = SaltBytes;  // Set the key to the stored salt
+                hmac.Key = StoredSaltBytes;  // Set the key to the stored salt
 
                 // Compute the hash of the salted password
                 byte[] computedHashBytes = hmac.ComputeHash(SaltedPassword);
