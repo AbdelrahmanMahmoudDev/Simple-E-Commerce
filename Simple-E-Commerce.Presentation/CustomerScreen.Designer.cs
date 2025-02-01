@@ -38,6 +38,7 @@
             Name = "frm_CustomerScreen";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Simple E-Commeerce";
+            FormClosed += frm_CustomerScreen_FormClosed;
             ResumeLayout(false);
         }
 

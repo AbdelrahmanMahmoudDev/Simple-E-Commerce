@@ -29,20 +29,20 @@ namespace Simple_E_Commerce.Presentation
             {
                 if(_UsersService.IsUserAdmin(tb_Username.Text))
                 {
-                    frm_AdminScreen AdminScreen = new frm_AdminScreen();
-                    AdminScreen.Show();
-                    this.Close();
+                    PresentationHelper.AdminScreen.Show();
+                    Hide();
                 }
-                frm_CustomerScreen CustomerScreen = new frm_CustomerScreen();
-                CustomerScreen.Show();
-                this.Close();
+                else
+                {
+                    PresentationHelper.CustomerScreen.Show();
+                    Hide();
+                }
             }
         }
 
         private void btn_Register_Click(object sender, EventArgs e)
         {
-            frm_RegisterScreen RegisterScreen = new frm_RegisterScreen(_IDBContext);
-            RegisterScreen.ShowDialog();
+            PresentationHelper.RegisterScreen.ShowDialog();
 
         }
     }
