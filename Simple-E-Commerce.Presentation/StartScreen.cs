@@ -1,3 +1,5 @@
+using System.Data;
+using System.Runtime.CompilerServices;
 using Simple_E_Commerce.BusinessLogic;
 using Simple_E_Commerce.DataAccess.DBContext;
 
@@ -16,15 +18,25 @@ namespace Simple_E_Commerce.Presentation
 
         private void btn_Login_Click(object sender, EventArgs e)
         {
-            string PasswordInput = tb_Password.Text;
-
-            if(!_UsersService.SearchUsernames(tb_Username.Text, out string Result))
+            string Result = _UsersService.VerifyUser(tb_Username.Text, tb_Password.Text);
+            if(Result != string.Empty)
             {
                 MessageBox.Show($"{Result}");
                 tb_Username.Text = string.Empty;
                 tb_Password.Text = string.Empty;
             }
-
+            else
+            {
+                if(_UsersService.IsUserAdmin(tb_Username.Text))
+                {
+                    frm_AdminScreen AdminScreen = new frm_AdminScreen();
+                    AdminScreen.Show();
+                    this.Close();
+                }
+                frm_CustomerScreen CustomerScreen = new frm_CustomerScreen();
+                CustomerScreen.Show();
+                this.Close();
+            }
         }
 
         private void btn_Register_Click(object sender, EventArgs e)

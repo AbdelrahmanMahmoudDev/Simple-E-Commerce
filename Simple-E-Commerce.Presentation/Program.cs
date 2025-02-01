@@ -11,7 +11,6 @@ namespace Simple_E_Commerce.Presentation
         /// </summary>
         [STAThread]
         static void Main()
-        
         {
             SqlServerContext CurrentDBContext = (SqlServerContext)DBContextHelper.Init();
             // To customize application configuration such as set high DPI settings or default font,

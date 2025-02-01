@@ -28,17 +28,6 @@ namespace Simple_E_Commerce.Presentation
                 tb_RegEmail.Text.Trim() != String.Empty);
         }
 
-        private void ResetForm()
-        {
-            tb_RegUsername.Text = String.Empty;
-            tb_RegPassword.Text = String.Empty;
-            tb_RegEmail.Text = String.Empty;
-            tb_RegAddress.Text = String.Empty;
-            nud_RegAge.Value = 0;
-            rb_RegOptCustomer.Checked = true;
-            rb_RegOptAdmin.Checked = false;
-        }
-
         private void btn_RegRegister_Click(object sender, EventArgs e)
         {
             if (!ValidateInput())

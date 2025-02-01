@@ -19,7 +19,6 @@ namespace Simple_E_Commerce.BusinessLogic
         private static DataTable _AllUsersTable;
         private IDBContext _DBContext;
         // All primary keys are identity, so this should work for what it is
-        private int _UserCount = 0;
         #endregion
 
         #region Constructors
@@ -79,17 +78,8 @@ namespace Simple_E_Commerce.BusinessLogic
                 """;
             _DBContext.ExecuteNonSelect(DMLType.Delete, InsertQuery.Trim(), new List<SqlParameter>() { new SqlParameter("UserId", SqlDbType.Int, 4, "UserId") });
 
-            _AllUsersTable = new DataTable();
-            _AllUsersTable.Columns.Add("UserId", typeof(int)).AutoIncrement = true;
-            _AllUsersTable.Columns.Add("Username", typeof(string));
-            _AllUsersTable.Columns.Add("PasswordHash", typeof(string));
-            _AllUsersTable.Columns.Add("Salt", typeof(string));
-            _AllUsersTable.Columns.Add("Email", typeof(string));
-            _AllUsersTable.Columns.Add("Age", typeof(int));
-            _AllUsersTable.Columns.Add("Address", typeof(string));
-            _AllUsersTable.Columns.Add("IsAdmin", typeof(bool));
-
-            //_AllUsersTable = GetAllUsers();
+            _AllUsersTable = GetAllUsers();
+            _AllUsersTable.Columns["UserId"].AutoIncrement = true;
         }
         #endregion
 
@@ -97,7 +87,18 @@ namespace Simple_E_Commerce.BusinessLogic
         public DataTable GetAllUsers()
         {
             DataTable Result = _DBContext.ExecuteSelect("SELECT * FROM USERS");
-            _UserCount = Result.Rows.Count;
+            return Result;
+        }
+
+        public DataTable GetUserBasedOnName(string InputUsername)
+        {
+            const string Query = """
+                SELECT * FROM USERS
+                WHERE Username = @Username;
+                """;
+            DataTable Result = _DBContext.ExecuteSelect(Query,
+                new SqlParameter("Username", InputUsername));
+
             return Result;
         }
 
@@ -105,7 +106,7 @@ namespace Simple_E_Commerce.BusinessLogic
         {
             DataTable AllUsers = GetAllUsers();
 
-            foreach(DataRow UserRow in AllUsers.Rows)
+            foreach (DataRow UserRow in AllUsers.Rows)
             {
                 if (UserRow["Username"].ToString() == InputUsername)
                 {
@@ -115,6 +116,33 @@ namespace Simple_E_Commerce.BusinessLogic
             }
             ResultString = "User doesn't exist!";
             return false;
+        }
+
+        public string VerifyUser(string InputUsername, string InputPassword)
+        {
+            string ErrorResult = string.Empty;
+            if (!SearchUsernames(InputUsername, out string Result))
+            {
+                ErrorResult = Result;
+            }
+            DataTable TargetUser = GetUserBasedOnName(InputUsername);
+            DataRow Row = TargetUser.Rows[0];
+            string StoredHash = Row["PasswordHash"].ToString();
+            string StoredSalt = Row["Salt"].ToString();
+
+            if (!PasswordHasher.VerifyPassword(InputPassword, StoredHash, StoredSalt))
+            {
+                ErrorResult = "The username or password you've entered is incorrect!";
+            }
+
+            return ErrorResult;
+        }
+
+        public bool IsUserAdmin(string InputUsername)
+        {
+            DataTable TargetUser = GetUserBasedOnName(InputUsername);
+            DataRow Row = TargetUser.Rows[0];
+            return (bool)Row["IsAdmin"];
         }
 
         public void InsertUser(UserRow NewRowData)
@@ -133,7 +161,7 @@ namespace Simple_E_Commerce.BusinessLogic
                 Row["Address"] = NewRowData.Address == string.Empty ? null : NewRowData.Address;
                 _AllUsersTable.Rows.Add(Row);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // TODO: Logging
                 Console.WriteLine(ex.Message);
@@ -143,7 +171,7 @@ namespace Simple_E_Commerce.BusinessLogic
 
         public void UpdateUser(int RowIndex, UserRow NewRowData)
         {
-            if(!(RowIndex >= 0 && RowIndex <=  _AllUsersTable.Rows.Count))
+            if (!(RowIndex >= 0 && RowIndex <= _AllUsersTable.Rows.Count))
             {
                 // TODO: Logging
                 throw new IndexOutOfRangeException("Row Index out of range!!");
