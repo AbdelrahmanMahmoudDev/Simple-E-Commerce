@@ -55,8 +55,8 @@ namespace Simple_E_Commerce.BusinessLogic
             _DBContext.ExecuteNonSelect(DMLType.Update, UpdateQuery.Trim(), UpdateParams);
 
             const string InsertQuery = """
-                INSERT INTO USERS (UserId, Username, PasswordHash, Salt, Email, Age, Address, IsAdmin)
-                VALUES (@UserId, @Username, @PasswordHash, @Salt, @Email, @Age, @Address, @IsAdmin);
+                INSERT INTO USERS (Username, PasswordHash, Salt, Email, Age, Address, IsAdmin)
+                VALUES (@Username, @PasswordHash, @Salt, @Email, @Age, @Address, @IsAdmin);
                 """;
 
             List<SqlParameter> InsertParams = new List<SqlParameter>()
@@ -77,9 +77,19 @@ namespace Simple_E_Commerce.BusinessLogic
                 DELETE FROM USERS
                 WHERE UserId = @UserId;
                 """;
-            _DBContext.ExecuteNonSelect(DMLType.Insert, InsertQuery.Trim(), new List<SqlParameter>() { new SqlParameter("UserId", SqlDbType.Int, 4, "UserId") });
+            _DBContext.ExecuteNonSelect(DMLType.Delete, InsertQuery.Trim(), new List<SqlParameter>() { new SqlParameter("UserId", SqlDbType.Int, 4, "UserId") });
 
-            _AllUsersTable = GetAllUsers();
+            _AllUsersTable = new DataTable();
+            _AllUsersTable.Columns.Add("UserId", typeof(int)).AutoIncrement = true;
+            _AllUsersTable.Columns.Add("Username", typeof(string));
+            _AllUsersTable.Columns.Add("PasswordHash", typeof(string));
+            _AllUsersTable.Columns.Add("Salt", typeof(string));
+            _AllUsersTable.Columns.Add("Email", typeof(string));
+            _AllUsersTable.Columns.Add("Age", typeof(int));
+            _AllUsersTable.Columns.Add("Address", typeof(string));
+            _AllUsersTable.Columns.Add("IsAdmin", typeof(bool));
+
+            //_AllUsersTable = GetAllUsers();
         }
         #endregion
 
@@ -114,7 +124,6 @@ namespace Simple_E_Commerce.BusinessLogic
 
             try
             {
-                Row["UserId"] = ++_UserCount;
                 Row["Username"] = String.Copy(NewRowData.Username);
                 Row["PasswordHash"] = String.Copy(Hash);
                 Row["Salt"] = String.Copy(Salt);

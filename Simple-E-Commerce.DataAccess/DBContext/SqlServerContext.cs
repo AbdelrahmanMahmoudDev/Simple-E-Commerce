@@ -84,46 +84,51 @@ namespace Simple_E_Commerce.DataAccess.DBContext
         }
         public void ExecuteNonSelect(DMLType Type, string Query, params List<SqlParameter> ParamList)
         {
-            using (SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))
+            SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString);
+            using (SqlCommand Command = new SqlCommand(Query, Connection))
             {
-                using (SqlCommand Command = new SqlCommand(Query, Connection))
+                Command.CommandType = CommandType.Text;
+                foreach (SqlParameter Param in ParamList)
                 {
-                    Command.CommandType = CommandType.Text;
-                    foreach (SqlParameter Param in ParamList)
-                    {
-                        Command.Parameters.Add(Param);
-                    }
-                    _DisconnectedDataAdapter = new SqlDataAdapter(Command);
-                    switch (Type)
-                    {
-                        case DMLType.Insert:
-                            {
-                                _DisconnectedDataAdapter.InsertCommand = Command;
-                            }
-                            break;
-                        case DMLType.Update:
-                            {
-                                _DisconnectedDataAdapter.UpdateCommand = Command;
-                            }
-                            break;
-                        case DMLType.Delete:
-                            {
-                                _DisconnectedDataAdapter.DeleteCommand = Command;
-                            }
-                            break;
-                    }
+                    Command.Parameters.Add(Param);
+                }
+                switch (Type)
+                {
+                    case DMLType.Insert:
+                        {
+                            _DisconnectedDataAdapter.InsertCommand = Command;
+                        }
+                        break;
+                    case DMLType.Update:
+                        {
+                            _DisconnectedDataAdapter.UpdateCommand = Command;
+                        }
+                        break;
+                    case DMLType.Delete:
+                        {
+                            _DisconnectedDataAdapter.DeleteCommand = Command;
+                        }
+                        break;
                 }
             }
         }
         public void UploadToServer(DataTable DataContainer)
         {
-            using(SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))
+            using (SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))
             {
                 try
                 {
                     Connection.Open();
-                    int r = _DisconnectedDataAdapter.Update(DataContainer);
-                    if (r == 0) throw new Exception("No rows were updated!");
+                    int RowCount = 0;
+                    try
+                    {
+                        RowCount = _DisconnectedDataAdapter.Update(DataContainer);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message + '\n' + ex.StackTrace);
+                    }
+                    if (RowCount == 0) throw new Exception("No rows were updated!");
                 }
                 catch (Exception ex)
                 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,11 +16,17 @@ namespace Simple_E_Commerce.DataAccess
         static public IDBContext Init()
         {
             string SolutionDirectory = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "appsettings.json");
-            
-            _Configuration = new ConfigurationBuilder()
-            .AddJsonFile(SolutionDirectory)
-            .Build();
 
+            try
+            {
+                _Configuration = new ConfigurationBuilder()
+                .AddJsonFile(SolutionDirectory)
+                .Build();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
             ConnectionString = _Configuration.GetSection("constr").Value;
 
             if (string.IsNullOrEmpty(ConnectionString))
