@@ -123,6 +123,8 @@ namespace Simple_E_Commerce.DataAccess.DBContext
                     try
                     {
                         RowCount = _DisconnectedDataAdapter.Update(DataContainer);
+                        Debug.WriteLine(RowCount);
+
                     }
                     catch (Exception ex)
                     {
