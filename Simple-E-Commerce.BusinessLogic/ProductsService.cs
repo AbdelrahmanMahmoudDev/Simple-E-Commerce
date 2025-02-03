@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Simple_E_Commerce.DataAccess.DBContext;
 
@@ -30,7 +31,7 @@ namespace Simple_E_Commerce.BusinessLogic
                 SET
                 ProductName = @ProductName,
                 Price = @Price,
-                Category = @CategoryId,
+                CategoryId = @CategoryId
                 WHERE ProductId = @ProductId;
                 """;
 
@@ -105,7 +106,6 @@ namespace Simple_E_Commerce.BusinessLogic
                 // TODO: Logging
                 Console.WriteLine(ex.Message);
             }
-
             DataRow DispTableRow = _AllProductsWithCategoryNames.NewRow();
             try
             {
@@ -128,45 +128,53 @@ namespace Simple_E_Commerce.BusinessLogic
             }
         }
 
-        public void UpdateProduct(int RowIndex, ProductRow NewRowData)
+        public void UpdateProduct(int PrimaryKey, ProductRow NewRowData)
         {
-            if (!(RowIndex >= 0 && RowIndex <= _AllProductsTable.Rows.Count))
+            int TargetTableIndex = -1;
+            Debug.Assert(_AllProductsTable.Rows.Count > 0);
+            for (int i = 0; i < _AllProductsTable.Rows.Count; i++)
             {
-                // TODO: Logging
-                throw new IndexOutOfRangeException("Row Index out of range!!");
+                if ((int)_AllProductsTable.Rows[i]["ProductId"] == PrimaryKey && _AllProductsTable.Rows[i].RowState != DataRowState.Deleted)
+                {
+                    TargetTableIndex = i;
+                    break;
+                }
             }
-            DataRow SelectedRow = _AllProductsTable.Rows[RowIndex];
+            Debug.Assert(TargetTableIndex != -1, "Primary Key not found in the table");
+            DataRow SelectedRow = _AllProductsTable.Rows[TargetTableIndex];
 
             SelectedRow["ProductName"] = String.Copy(NewRowData.ProductName);
             SelectedRow["Price"] = NewRowData.Price;
             SelectedRow["CategoryId"] = NewRowData.CateogryId;
-
-            DataRow DispTableRow = _AllProductsWithCategoryNames.Rows[RowIndex];
+            _AllProductsWithCategoryNames.Columns["CategoryId"].ReadOnly = false;
+            DataRow DispTableRow = _AllProductsWithCategoryNames.Rows[TargetTableIndex];
 
             DispTableRow["ProductName"] = String.Copy(NewRowData.ProductName);
             DispTableRow["Price"] = NewRowData.Price;
             DispTableRow["CategoryId"] = NewRowData.CateogryId;
             DataRow categoryRow = _DBContext.ExecuteSelect("SELECT CategoryName FROM Categories WHERE CategoryId = @CategoryId",
-     new SqlParameter()
-     {
-         ParameterName = "@CategoryId",
-         SqlDbType = System.Data.SqlDbType.Int,
-         Direction = System.Data.ParameterDirection.Input,
-         Value = NewRowData.CateogryId,
-     }).Rows[0];
-            DispTableRow["CategoryName"] = categoryRow["CategoryName"];
+            new SqlParameter()
+            {
+                ParameterName = "@CategoryId",
+                SqlDbType = System.Data.SqlDbType.Int,
+                Direction = System.Data.ParameterDirection.Input,
+                Value = NewRowData.CateogryId,
+            }).Rows[0];
+                   DispTableRow["CategoryName"] = categoryRow["CategoryName"];
+            _AllProductsWithCategoryNames.Columns["CategoryId"].ReadOnly = true;
 
         }
 
-        public void DeleteProduct(int RowIndex)
+        public void DeleteProduct(int PrimaryKey)
         {
-            if ((RowIndex >= 0 && RowIndex <= _AllProductsTable.Rows.Count))
+            for(int i = 0; i < _AllProductsTable.Rows.Count; i++)
             {
-                DataRow SelectedRow = _AllProductsTable.Rows[RowIndex];
-                SelectedRow.Delete();
-
-                DataRow DispTableRow = _AllProductsWithCategoryNames.Rows[RowIndex];
-                DispTableRow.Delete();
+                if ((int)_AllProductsTable.Rows[i]["ProductId"] == PrimaryKey)
+                {
+                    _AllProductsTable.Rows[i].Delete();
+                    _AllProductsWithCategoryNames.Rows[i].Delete();
+                    break;
+                }
             }
         }
 

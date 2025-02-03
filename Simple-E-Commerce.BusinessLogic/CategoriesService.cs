@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Simple_E_Commerce.DataAccess.DBContext;
 
@@ -83,22 +84,33 @@ namespace Simple_E_Commerce.BusinessLogic
 
         }
 
-        public void UpdateCategory(int RowIndex, CategoryRow NewRowData)
+        public void UpdateCategory(int RowIndex, CategoryRow NewRowData, int PrimaryKey)
         {
-            if (!(RowIndex >= 0 && RowIndex <= _AllCategoriesTable.Rows.Count))
+            int TargetTableIndex = -1;
+            Debug.Assert(_AllCategoriesTable.Rows.Count > 0);
+            for (int i = 0; i < _AllCategoriesTable.Rows.Count; i++)
             {
-                // TODO: Logging
-                throw new IndexOutOfRangeException("Row Index out of range!!");
+                if ((int)_AllCategoriesTable.Rows[i]["CategoryId"] == PrimaryKey && _AllCategoriesTable.Rows[i].RowState != DataRowState.Deleted)
+                {
+                    TargetTableIndex = i;
+                    break;
+                }
             }
-            DataRow SelectedRow = _AllCategoriesTable.Rows[RowIndex];
+            DataRow SelectedRow = _AllCategoriesTable.Rows[TargetTableIndex];
 
             SelectedRow["CategoryName"] = String.Copy(NewRowData.CategoryName);
         }
 
-        public void DeleteCategory(int RowIndex)
+        public void DeleteCategory(int RowIndex, int PrimaryKey)
         {
-            DataRow SelectedRow = _AllCategoriesTable.Rows[RowIndex];
-            SelectedRow.Delete();
+            for (int i = 0; i < _AllCategoriesTable.Rows.Count; i++)
+            {
+                if ((int)_AllCategoriesTable.Rows[i]["CategoryId"] == PrimaryKey)
+                {
+                    _AllCategoriesTable.Rows[i].Delete();
+                    break;
+                }
+            }
         }
 
         public void SubmitCategoryChanges()

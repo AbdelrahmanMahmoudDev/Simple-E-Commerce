@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using System.Diagnostics;
-using System.Formats.Tar;
 using Microsoft.Data.SqlClient;
 using Simple_E_Commerce.DataAccess.DBContext;
 
@@ -21,7 +20,6 @@ namespace Simple_E_Commerce.BusinessLogic
         private static DataTable _AllUsersTable;
         public static DataTable AllUsersTable { get => _AllUsersTable; }
         private IDBContext _DBContext;
-        // All primary keys are identity, so this should work for what it is
         #endregion
 
         #region Constructors
@@ -188,16 +186,21 @@ namespace Simple_E_Commerce.BusinessLogic
 
         }
 
-        public void UpdateUser(int RowIndex, UserRow NewRowData)
+        public void UpdateUser(UserRow NewRowData, int PrimaryKey)
         {
-            if (!(RowIndex >= 0 && RowIndex <= _AllUsersTable.Rows.Count))
+            int TargetTableIndex = -1;
+            Debug.Assert(_AllUsersTable.Rows.Count > 0);
+            for (int i = 0; i < _AllUsersTable.Rows.Count; i++)
             {
-                // TODO: Logging
-                throw new IndexOutOfRangeException("Row Index out of range!!");
+                if ((int)_AllUsersTable.Rows[i]["UserId"] == PrimaryKey && _AllUsersTable.Rows[i].RowState != DataRowState.Deleted)
+                {
+                    TargetTableIndex = i;
+                    break;
+                }
             }
             (string Hash, string Salt) = PasswordHasher.HashPassword(NewRowData.Password);
 
-            DataRow SelectedRow = _AllUsersTable.Rows[RowIndex];
+            DataRow SelectedRow = _AllUsersTable.Rows[TargetTableIndex];
 
             SelectedRow["Username"] = String.Copy(NewRowData.Username);
             SelectedRow["PasswordHash"] = String.Copy(Hash);
@@ -208,10 +211,16 @@ namespace Simple_E_Commerce.BusinessLogic
             SelectedRow["Address"] = NewRowData.Address == string.Empty ? null : NewRowData.Address;
         }
 
-        public void DeleteUser(int RowIndex)
+        public void DeleteUser(int PrimaryKey)
         {
-            DataRow SelectedRow = _AllUsersTable.Rows[RowIndex];
-            SelectedRow.Delete();
+            for (int i = 0; i < _AllUsersTable.Rows.Count; i++)
+            {
+                if ((int)_AllUsersTable.Rows[i]["UserId"] == PrimaryKey)
+                {
+                    _AllUsersTable.Rows[i].Delete();
+                    break;
+                }
+            }
         }
 
         public void SubmitUserUpdates()

@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Data;
 using Simple_E_Commerce.BusinessLogic;
 using Simple_E_Commerce.DataAccess.DBContext;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Simple_E_Commerce.Presentation
 {
@@ -20,15 +8,16 @@ namespace Simple_E_Commerce.Presentation
     {
         IDBContext _Context;
         UsersService _UsersService;
+        DataTable _ViewTable;
         int _SelectedRow; // needed to grab selected data
         public frm_AdminUserControl(IDBContext Context)
         {
+            InitializeComponent();
             _Context = Context;
             _UsersService = new UsersService(_Context);
+            _ViewTable = UsersService.AllUsersTable.Copy();
 
-            InitializeComponent();
-
-            dgv_AdminUserTable.DataSource = _UsersService.GetAllUsers();
+            dgv_AdminUserTable.DataSource = _ViewTable;
             dgv_AdminUserTable.Columns["UserId"].Visible = false;
         }
 
@@ -44,17 +33,22 @@ namespace Simple_E_Commerce.Presentation
                 IsAdmin = rb_AdminUserViewRegOptAdmin.Checked
             };
             _UsersService.InsertUser(NewRow);
-            dgv_AdminUserTable.DataSource = UsersService.AllUsersTable;
+            _ViewTable = UsersService.AllUsersTable.Copy();
+            dgv_AdminUserTable.DataSource = _ViewTable;
         }
 
         private void btn_AdminUserViewRegRemove_Click(object sender, EventArgs e)
         {
-            _UsersService.DeleteUser(_SelectedRow);
-            dgv_AdminUserTable.DataSource = UsersService.AllUsersTable;
+            int PrimaryKey = (int)dgv_AdminUserTable.Rows[_SelectedRow].Cells["UserId"].Value;
+            _UsersService.DeleteUser(PrimaryKey);
+            _ViewTable = UsersService.AllUsersTable.Copy();
+            _ViewTable.Rows.RemoveAt(_SelectedRow);
+            dgv_AdminUserTable.DataSource = _ViewTable;
         }
 
         private void btn_AdminUserViewRegUpdate_Click(object sender, EventArgs e)
         {
+            int PrimaryKey = (int)dgv_AdminUserTable.Rows[_SelectedRow].Cells["UserId"].Value;
             UserRow NewRow = new UserRow()
             {
                 Username = tb_AdminUserViewRegUsername.Text,
@@ -64,8 +58,9 @@ namespace Simple_E_Commerce.Presentation
                 Address = tb_AdminUserViewRegAddress.Text,
                 IsAdmin = rb_AdminUserViewRegOptAdmin.Checked
             };
-            _UsersService.UpdateUser(_SelectedRow, NewRow);
-            dgv_AdminUserTable.DataSource = UsersService.AllUsersTable;
+            _UsersService.UpdateUser(NewRow, PrimaryKey);
+            _ViewTable = UsersService.AllUsersTable.Copy();
+            dgv_AdminUserTable.DataSource = _ViewTable;
         }
 
         private void frm_AdminUserControl_FormClosed(object sender, FormClosedEventArgs e)
@@ -79,20 +74,21 @@ namespace Simple_E_Commerce.Presentation
             try
             {
                 _SelectedRow = e.RowIndex;
-                DataRow SelectedRow = UsersService.AllUsersTable.Rows[e.RowIndex];
-                tb_AdminUserViewRegUsername.Text = SelectedRow["Username"].ToString();
-                tb_AdminUserViewRegPassword.Text = "";
-                tb_AdminUserViewRegEmail.Text = SelectedRow["Email"].ToString();
-                nud_AdminUserViewRegAge.Value = SelectedRow["Age"] == DBNull.Value ? 0 : (int)SelectedRow["Age"];
-                tb_AdminUserViewRegAddress.Text = SelectedRow["Address"] == DBNull.Value ? string.Empty : SelectedRow["Address"].ToString();
-
-                if ((bool)SelectedRow["IsAdmin"])
+                if (_SelectedRow >= 0 && _SelectedRow < dgv_AdminUserTable.Rows.Count - 1)
                 {
-                    rb_AdminUserViewRegOptAdmin.Checked = true;
-                }
-                else
-                {
-                    rb_AdminUserViewRegOptCustomer.Checked = true;
+                    tb_AdminUserViewRegUsername.Text = (string)dgv_AdminUserTable.Rows[_SelectedRow].Cells["Username"].Value;
+                    tb_AdminUserViewRegPassword.Text = "";
+                    tb_AdminUserViewRegEmail.Text = (string)dgv_AdminUserTable.Rows[_SelectedRow].Cells["Email"].Value;
+                    nud_AdminUserViewRegAge.Value = (int)dgv_AdminUserTable.Rows[_SelectedRow].Cells["Age"].Value;
+                    tb_AdminUserViewRegAddress.Text = (string)dgv_AdminUserTable.Rows[_SelectedRow].Cells["Address"].Value;
+                    if ((bool)dgv_AdminUserTable.Rows[_SelectedRow].Cells["IsAdmin"].Value)
+                    {
+                        rb_AdminUserViewRegOptAdmin.Checked = true;
+                    }
+                    else
+                    {
+                        rb_AdminUserViewRegOptCustomer.Checked = true;
+                    }
                 }
             }
             catch (Exception ex)

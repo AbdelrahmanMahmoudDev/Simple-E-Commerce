@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Data;
 using Simple_E_Commerce.BusinessLogic;
 using Simple_E_Commerce.DataAccess.DBContext;
 
@@ -16,13 +8,15 @@ namespace Simple_E_Commerce.Presentation
     {
         IDBContext _Context;
         CategoriesService _CategoriesService;
+        DataTable _ViewTable;
         int _SelectedRow;
         public frm_AdminCategoryControl(IDBContext Context)
         {
+            InitializeComponent();
             _Context = Context;
             _CategoriesService = new CategoriesService(_Context);
-            InitializeComponent();
-            dgv_AdminCatTable.DataSource = _CategoriesService.GetCategories();
+            _ViewTable = CategoriesService.AllCategoriesTable.Copy();
+            dgv_AdminCatTable.DataSource = _ViewTable;
         }
 
         private void frm_AdminCategoryControl_FormClosed(object sender, FormClosedEventArgs e)
@@ -34,19 +28,24 @@ namespace Simple_E_Commerce.Presentation
         private void btn_AdminCatViewRegAdd_Click(object sender, EventArgs e)
         {
             _CategoriesService.InsertCategory(new CategoryRow { CategoryName = tb_AdminCatViewCatNane.Text });
-            dgv_AdminCatTable.DataSource = CategoriesService.AllCategoriesTable;
+            _ViewTable = CategoriesService.AllCategoriesTable.Copy();
+            dgv_AdminCatTable.DataSource = _ViewTable;
         }
 
         private void btn_AdminCatViewRegRemove_Click(object sender, EventArgs e)
         {
-            _CategoriesService.DeleteCategory(_SelectedRow);
-            dgv_AdminCatTable.DataSource = CategoriesService.AllCategoriesTable;
+            int PrimaryKey = (int)dgv_AdminCatTable.Rows[_SelectedRow].Cells["CategoryId"].Value;
+            _CategoriesService.DeleteCategory(_SelectedRow, PrimaryKey);
+            _ViewTable = CategoriesService.AllCategoriesTable.Copy();
+            dgv_AdminCatTable.DataSource = _ViewTable;
         }
 
         private void btn_AdminCatViewRegUpdate_Click(object sender, EventArgs e)
         {
-            _CategoriesService.UpdateCategory(_SelectedRow, new CategoryRow() { CategoryName = tb_AdminCatViewCatNane.Text});
-            dgv_AdminCatTable.DataSource = CategoriesService.AllCategoriesTable;
+            int PrimaryKey = (int)dgv_AdminCatTable.Rows[_SelectedRow].Cells["CategoryId"].Value;
+            _CategoriesService.UpdateCategory(_SelectedRow, new CategoryRow() { CategoryName = tb_AdminCatViewCatNane.Text }, PrimaryKey);
+            _ViewTable = CategoriesService.AllCategoriesTable.Copy();
+            dgv_AdminCatTable.DataSource = _ViewTable;
         }
 
         private void btn_AdminCatViewRegSubmit_Click(object sender, EventArgs e)
@@ -59,8 +58,11 @@ namespace Simple_E_Commerce.Presentation
             try
             {
                 _SelectedRow = e.RowIndex;
-                DataRow SelectedRow = CategoriesService.AllCategoriesTable.Rows[e.RowIndex];
-                tb_AdminCatViewCatNane.Text = SelectedRow["CategoryName"].ToString();
+                if (_SelectedRow >= 0 && _SelectedRow < CategoriesService.AllCategoriesTable.Rows.Count)
+                {
+                    DataRow SelectedRow = CategoriesService.AllCategoriesTable.Rows[e.RowIndex];
+                    tb_AdminCatViewCatNane.Text = SelectedRow["CategoryName"].ToString();
+                }
             }
             catch (Exception ex)
             {
