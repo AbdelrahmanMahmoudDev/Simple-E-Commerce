@@ -29,6 +29,7 @@ namespace Simple_E_Commerce.Presentation
             InitializeComponent();
 
             dgv_AdminUserTable.DataSource = _UsersService.GetAllUsers();
+            dgv_AdminUserTable.Columns["UserId"].Visible = false;
         }
 
         private void btn_AdminUserViewRegAdd_Click(object sender, EventArgs e)

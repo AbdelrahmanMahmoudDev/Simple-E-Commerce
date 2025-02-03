@@ -12,9 +12,8 @@ namespace Simple_E_Commerce.BusinessLogic
     {
         #region Private_Properties
         private static DataTable _AllCategoriesTable;
-        public static DataTable AllCategoriesTable { get => _AllCategoriesTable} 
+        public static DataTable AllCategoriesTable { get => _AllCategoriesTable; }
         private IDBContext _DBContext;
-        // All primary keys are identity, so this should work for what it is
         #endregion
 
         #region Constructors
@@ -25,13 +24,13 @@ namespace Simple_E_Commerce.BusinessLogic
             const string UpdateQuery = """
                 UPDATE Categories
                 SET
-                CategoryName = @CategoryName,
+                CategoryName = @CategoryName
                 WHERE CategoryId = @CategoryId;
                 """;
 
             List<SqlParameter> UpdateParams = new List<SqlParameter>()
             {
-                new SqlParameter("CategoryName", SqlDbType.VarChar, 255, "CategoryName"),
+                new SqlParameter("CategoryName", SqlDbType.NVarChar, 255, "CategoryName"),
                 new SqlParameter("CategoryId", SqlDbType.Int, 4, "CategoryId"),
             };
 
@@ -53,7 +52,7 @@ namespace Simple_E_Commerce.BusinessLogic
                 DELETE FROM Categories
                 WHERE CategoryId = @CategoryId;
                 """;
-            _DBContext.ExecuteNonSelect(DMLType.Delete, DeleteQuery.Trim(), new List<SqlParameter>() { new SqlParameter("CategoryId", SqlDbType.Int, 4, "@CategoryId") });
+            _DBContext.ExecuteNonSelect(DMLType.Delete, DeleteQuery.Trim(), new List<SqlParameter>() { new SqlParameter("CategoryId", SqlDbType.Int, 4, "CategoryId") });
 
             _AllCategoriesTable = GetCategories();
             _AllCategoriesTable.Columns["CategoryId"].AutoIncrement = true;

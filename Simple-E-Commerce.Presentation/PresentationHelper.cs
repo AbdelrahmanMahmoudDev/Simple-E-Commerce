@@ -15,6 +15,7 @@ namespace Simple_E_Commerce.Presentation
         public static frm_CustomerScreen CustomerScreen;
         public static frm_AdminUserControl AdminUserControl;
         public static frm_AdminCategoryControl AdminCategoryControl;
+        public static frm_AdminProductControl AdminProductControl;
         public static void Init(IDBContext Context)
         {
             StartScreen = new frm_StartScreen(Context);
@@ -23,6 +24,7 @@ namespace Simple_E_Commerce.Presentation
             CustomerScreen = new frm_CustomerScreen(Context);
             AdminUserControl = new frm_AdminUserControl(Context);
             AdminCategoryControl = new frm_AdminCategoryControl(Context);
+            AdminProductControl = new frm_AdminProductControl(Context);
         }
     }
 }

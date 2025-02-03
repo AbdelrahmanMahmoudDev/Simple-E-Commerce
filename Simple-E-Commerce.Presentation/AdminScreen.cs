@@ -42,5 +42,12 @@ namespace Simple_E_Commerce.Presentation
             PresentationHelper.AdminCategoryControl.Show();
             Hide();
         }
+
+        private void btn_AdminProductView_Click(object sender, EventArgs e)
+        {
+            PresentationHelper.AdminProductControl = new frm_AdminProductControl(_Context);
+            PresentationHelper.AdminProductControl.Show();
+            Hide();
+        }
     }
 }

@@ -41,6 +41,7 @@
             btn_AdminProductView.TabIndex = 2;
             btn_AdminProductView.Text = "Products";
             btn_AdminProductView.UseVisualStyleBackColor = true;
+            btn_AdminProductView.Click += btn_AdminProductView_Click;
             // 
             // btn_AdminCategoryView
             // 
