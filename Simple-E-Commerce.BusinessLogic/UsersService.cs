@@ -182,7 +182,7 @@ namespace Simple_E_Commerce.BusinessLogic
             catch (Exception ex)
             {
                 // TODO: Logging
-                Console.WriteLine(ex.Message);
+                Debug.WriteLine(ex.Message);
             }
 
         }
