@@ -35,7 +35,7 @@ namespace Simple_E_Commerce.Presentation
         private void btn_AdminCatViewRegRemove_Click(object sender, EventArgs e)
         {
             int PrimaryKey = (int)dgv_AdminCatTable.Rows[_SelectedRow].Cells["CategoryId"].Value;
-            _CategoriesService.DeleteCategory(_SelectedRow, PrimaryKey);
+            _CategoriesService.DeleteCategory(PrimaryKey);
             _ViewTable = CategoriesService.AllCategoriesTable.Copy();
             dgv_AdminCatTable.DataSource = _ViewTable;
         }
@@ -43,7 +43,7 @@ namespace Simple_E_Commerce.Presentation
         private void btn_AdminCatViewRegUpdate_Click(object sender, EventArgs e)
         {
             int PrimaryKey = (int)dgv_AdminCatTable.Rows[_SelectedRow].Cells["CategoryId"].Value;
-            _CategoriesService.UpdateCategory(_SelectedRow, new CategoryRow() { CategoryName = tb_AdminCatViewCatNane.Text }, PrimaryKey);
+            _CategoriesService.UpdateCategory(new CategoryRow() { CategoryName = tb_AdminCatViewCatNane.Text }, PrimaryKey);
             _ViewTable = CategoriesService.AllCategoriesTable.Copy();
             dgv_AdminCatTable.DataSource = _ViewTable;
         }

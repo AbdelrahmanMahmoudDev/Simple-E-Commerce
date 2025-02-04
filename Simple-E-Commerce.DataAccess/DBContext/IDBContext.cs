@@ -18,5 +18,8 @@ namespace Simple_E_Commerce.DataAccess.DBContext
         // DML Queries execute in Disconnected Mode
         public void ExecuteNonSelect(DMLType Type, string Query, params List<SqlParameter> ParamList);
         public void UploadToServer(DataTable DataContainer);
+
+        // DML Queries execute in Connected Mode
+        public void ExecuteNonSelect(string Query, params List<SqlParameter> ParamList);
     }
 }

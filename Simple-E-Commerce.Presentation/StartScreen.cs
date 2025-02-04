@@ -9,6 +9,7 @@ namespace Simple_E_Commerce.Presentation
     public partial class frm_StartScreen : Form
     {
         UsersService _UsersService;
+        int TargetUserId = -1;
         IDBContext _IDBContext;
         public frm_StartScreen(IDBContext Context)
         {
@@ -19,7 +20,8 @@ namespace Simple_E_Commerce.Presentation
 
         private void btn_Login_Click(object sender, EventArgs e)
         {
-            if(!_UsersService.VerifyUser(tb_Username.Text, tb_Password.Text, out string ErrorResult))
+            (bool isVerified, DataTable ThisUserTable) = _UsersService.VerifyUser(tb_Username.Text, tb_Password.Text, out string ErrorResult);
+            if (!isVerified)
             {
                 MessageBox.Show($"{ErrorResult}");
                 tb_Username.Text = string.Empty;
@@ -27,7 +29,8 @@ namespace Simple_E_Commerce.Presentation
             }
             else
             {
-                if(_UsersService.IsUserAdmin(tb_Username.Text))
+                TargetUserId = (int)ThisUserTable.Rows[0]["UserId"];
+                if (_UsersService.IsUserAdmin(tb_Username.Text))
                 {
                     PresentationHelper.AdminScreen = new frm_AdminScreen(_IDBContext);
                     PresentationHelper.AdminScreen.Show();
@@ -35,8 +38,8 @@ namespace Simple_E_Commerce.Presentation
                 }
                 else
                 {
-                    PresentationHelper.CustomerScreen = new frm_CustomerScreen(_IDBContext);
-                    PresentationHelper.CustomerScreen.Show();
+                    PresentationHelper.UserScreen = new frm_UserScreen(_IDBContext, TargetUserId);
+                    PresentationHelper.UserScreen.Show();
                     Hide();
                 }
             }
@@ -46,6 +49,11 @@ namespace Simple_E_Commerce.Presentation
         {
             PresentationHelper.RegisterScreen = new frm_RegisterScreen(_IDBContext);
             PresentationHelper.RegisterScreen.ShowDialog();
+        }
+
+        private void frm_StartScreen_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
         }
     }
 }

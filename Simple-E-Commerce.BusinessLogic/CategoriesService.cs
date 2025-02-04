@@ -78,13 +78,12 @@ namespace Simple_E_Commerce.BusinessLogic
             }
             catch (Exception ex)
             {
-                // TODO: Logging
-                Console.WriteLine(ex.Message);
+                Debug.WriteLine(ex.Message, ex.StackTrace);
             }
 
         }
 
-        public void UpdateCategory(int RowIndex, CategoryRow NewRowData, int PrimaryKey)
+        public void UpdateCategory(CategoryRow NewRowData, int PrimaryKey)
         {
             int TargetTableIndex = -1;
             Debug.Assert(_AllCategoriesTable.Rows.Count > 0);
@@ -101,7 +100,7 @@ namespace Simple_E_Commerce.BusinessLogic
             SelectedRow["CategoryName"] = String.Copy(NewRowData.CategoryName);
         }
 
-        public void DeleteCategory(int RowIndex, int PrimaryKey)
+        public void DeleteCategory(int PrimaryKey)
         {
             for (int i = 0; i < _AllCategoriesTable.Rows.Count; i++)
             {

@@ -112,6 +112,37 @@ namespace Simple_E_Commerce.DataAccess.DBContext
                 }
             }
         }
+
+        public void ExecuteNonSelect(string Query, params List<SqlParameter> ParamList)
+        {
+            using (SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))
+            {
+                using (SqlCommand Command = new SqlCommand(Query, Connection))
+                {
+                    Command.CommandType = CommandType.Text;
+                    foreach (SqlParameter Param in ParamList)
+                    {
+                        Command.Parameters.Add(Param);
+                    }
+                    _DisconnectedDataAdapter.SelectCommand = Command;
+                    try
+                    {
+                        Connection.Open();
+                        Command.ExecuteNonQuery();
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: Logger
+                        Debug.WriteLine(ex);
+                    }
+                    finally
+                    {
+                        Connection.Close();
+                    }
+                }
+            }
+
+        }
         public void UploadToServer(DataTable DataContainer)
         {
             using (SqlConnection Connection = new SqlConnection(DBContextHelper.ConnectionString))

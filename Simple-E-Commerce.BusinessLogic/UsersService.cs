@@ -129,18 +129,19 @@ namespace Simple_E_Commerce.BusinessLogic
             return false;
         }
 
-        public bool VerifyUser(string InputUsername, string InputPassword, out string ErrorResult)
+        public (bool, DataTable) VerifyUser(string InputUsername, string InputPassword, out string ErrorResult)
         {
             ErrorResult = string.Empty;
             if (!SearchUsernames(InputUsername, out string Result))
             {
                 ErrorResult = Result;
+                return (false, null);
             }
             DataTable TargetUser = GetUserBasedOnName(InputUsername, out string ErrorMessage);
             if (TargetUser.Rows.Count < 1)
             {
                 ErrorResult = "User doesn't exist in database!";
-                return false;
+                return (false, TargetUser);
             }
             DataRow Row = TargetUser.Rows[0];
             string StoredHash = Row["PasswordHash"].ToString();
@@ -151,7 +152,7 @@ namespace Simple_E_Commerce.BusinessLogic
                 ErrorResult = "The username or password you've entered is incorrect!";
             }
 
-            return true;
+            return (true, TargetUser);
         }
 
         public bool IsUserAdmin(string InputUsername)
